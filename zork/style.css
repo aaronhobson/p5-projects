@@ -7,14 +7,14 @@ body {
 }
 
 #canvas {
-    width: 600px;
+    width: 400px;
     height: 400px;
     border: 2px solid black;
     margin: auto;
 }
 
 #message-area {
-    width: 600px;
+    width: 400px;
     height: 5em;
     text-align: left;
     border: 2px solid black;

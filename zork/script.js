@@ -2,10 +2,13 @@ var canvas, msg, command, keywords;
 var helpText = "Valid commands are look, take, and help.";
 var errorText = "I'm sorry, I don't understand you.";
 
-//Initialize Rooms
+//Declare rooms
 var livingroom, classroom, kitchen, bathroom, hallway;
 
-//Initialize room objects
+//Declare images
+var livingRoomImg;
+
+//Initialize rooms
 livingroom = {
     name: "classroom",
     description: "You are standing in a huge living room.",
@@ -13,21 +16,22 @@ livingroom = {
     things: ["bat", "knife", "sign"]
 };
 
+
 //Initialize current room
 var currentroom = livingroom;
 
 function setup() {
-    canvas = createCanvas(600, 400);
+    canvas = createCanvas(400, 400);
     canvas.parent("#canvas");
     background(200, 100, 50);
     msg = select("#msg");
     command = select("#command");
     keywords = ["look", "take", "help"];
-    drawHouse();
+    livingRoomImg = loadImage("img/livingroom.png");
 }
 
 function draw() {
-
+    image(livingRoomImg, 0, 0);
 }
 
 function keyPressed() {
