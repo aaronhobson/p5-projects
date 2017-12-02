@@ -1,106 +1,163 @@
-var canvas, msg, command, keywords;
-var helpText = "Valid commands are look, take, and help.";
-var errorText = "I'm sorry, I don't understand you.";
+// Declare GUI/gameplay stuff
+var canvas, msg, msgArea, command, keywords;
 
-//Declare rooms
-var livingroom, classroom, kitchen, bathroom, hallway;
+// Declare items 
+var ball, triforce, soap;
 
-//Declare images
-var livingRoomImg;
+// Declare rooms
+var bathRoom, livingRoom;
 
-//Initialize rooms
-livingroom = {
-    name: "classroom",
-    description: "You are standing in a huge living room.",
-    localrooms:  ["bathroom", "kitchen", "hallway"],
-    things: ["bat", "knife", "sign"]
-};
-
-
-//Initialize current room
-var currentroom = livingroom;
+// Setup other global variables
+var currentLocation;
 
 function setup() {
-    canvas = createCanvas(400, 400);
+    canvas = createCanvas(300, 300);
     canvas.parent("#canvas");
-    background(200, 100, 50);
     msg = select("#msg");
+    msgArea = select("#message-area");
     command = select("#command");
     keywords = ["look", "take", "help"];
-    livingRoomImg = loadImage("img/livingroom.png");
+    
+    ball = new Item("ball", "A small ball. Round! Bouncy.", true, drawBall);
+    triforce = new Item("triforce", "A classic symbol of video games.", false, drawTriforce);
+    soap = new Item("soap", "A bar of dirty soap. Ugh!", true, drawSoap);
+    
+    livingRoom = new Room("livingroom", "A huge living room.", [ball, triforce], [], drawLivingRoom);
+    bathRoom = new Room("bathroom", "A dirty bathroom. Yuck!", [soap], [], drawBathRoom);
+    
+    livingRoom.places.push(bathRoom);
+    bathRoom.places.push(livingRoom);
+    
+    currentLocation = livingRoom;
+    
 }
 
 function draw() {
-    image(livingRoomImg, 0, 0);
+    currentLocation.drawRoom();
 }
 
 function keyPressed() {
   if (keyCode === ENTER) {
-    checkCommand();
+    parseCommand();
   } 
 }
 
-function changeMsg() {
-    msg.html(command.value());
-    command.html("");
-    background(200, 100, 50);
-    drawTriangle();
+function updateTextArea(str) {
+    msg.html(msg.html() + "<br>" + str);
+    msgArea.scrollTop = msgArea.scrollHeight;
 }
 
-function checkCommand() {
+function parseCommand() {
     var c = command.value().trim().split(" ");
     command.value("");
     if(c.length == 1){
         if(c[0] === "help") {
-            displayHelp();
+            updateTextArea("Valid commands are look, take, and help.");
         }
         else if(c[0] === "look") {
             displayLook();
         }
         else {
-            msg.html(errorText);
+            updateTextArea("I'm sorry, I don't understand you.");
         }
     }
     else if(c.length == 2 && c[0] === "look"){
-        displayLookObject(c[1]);
+        displayLookItem(c[1]);
     }
     else{
-        msg.html(errorText);
+        updateTextArea("I'm sorry, I don't understand you.");
     }
 }
 
-function displayHelp() {
-    msg.html(helpText);
-}
 
 function displayLook() {
-    msg.html(currentroom.description);
-    msg.html("<br>Objects in the room: ", true);
-    for (var thing in currentroom.things) {
-        msg.html(currentroom.things[thing] + " ", true);
-    }
-    msg.html("<br>Local rooms: ", true);
-    for (var local in currentroom.localrooms) {
-        msg.html(currentroom.localrooms[local] + " ", true);
-    }
+    updateTextArea(currentLocation.desc);
+    updateTextArea(currentLocation.listItems());
+    updateTextArea(currentLocation.listPlaces());
 }
 
-function displayLookObject(obj) {
-    function test(thingy) {
-        return obj === thingy;
+function displayLookItem(item) {
+    var found = false;
+    var i = 0;
+    while(!found && i < currentLocation.items.length){
+        if(currentLocation.items[i].name === item){
+            found = true;
+        }
+        else {
+            i++;
+        }
     }
-    if(typeof currentroom.things.find(test) === 'undefined') {
-        msg.html("I can't find that object.");
+    if(found) { 
+        updateTextArea(currentLocation.items[i].desc);
     }
     else {
-        msg.html("It's a bat. Pretty nice.");
+        updateTextArea("I can't find that item.");
     }
 }
 
-function drawHouse() {
-    rect(56, 46, 55, 55);
+function Room(name, desc, items, places, imageDrawer) {
+    this.name = name;
+    this.desc = desc;
+    this.items = items;
+    this.places = places;
+    this.imageDrawer = imageDrawer;
+    this.listItems = function() {
+        var text = "Items: ";
+        for(var i = 0; i < this.items.length; i++) {
+            text += this.items[i].name + " ";
+        }
+        return text;
+    };
+    this.listPlaces = function() {
+        var text = "Places: ";
+        for(var i = 0; i < this.places.length; i++) {
+            text += this.places[i].name + " ";
+        }
+        return text;
+    };
+    this.removeItem = function(item) {
+        if(this.items.indexOf(item) != -1){
+            this.items.splice(item, 1);
+        }
+    };
+    this.drawRoom = function() {
+        this.imageDrawer(); //draw the room itself
+        for(var i = 0; i < this.items.length; i++) {
+            this.items[i].drawItem(); //draw each item in the room
+        }
+    }
 }
 
-function drawTriangle() {
+function Item(name, desc, holdable, imageDrawer) {
+    this.name = name;
+    this.desc = desc;
+    this.holdable = holdable;
+    this.imageDrawer = imageDrawer;
+    this.drawItem = function() {
+        this.imageDrawer();
+    }
+}
+
+// Draw Items
+function drawBall() {
+    ellipse(100, 100, 20, 80);
+}
+
+function drawTriforce() {
     triangle(30, 75, 58, 20, 86, 75);
+}
+
+function drawSoap() {
+    rect(30, 20, 55, 55);
+}
+
+// Draw Rooms
+function drawLivingRoom() {
+    background(100, 200, 200);
+    line(30, 20, 85, 75);
+}
+
+function drawBathRoom() {
+    background(200, 50, 100);
+    line(100, 100, 30, 95);
 }

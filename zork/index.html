@@ -11,26 +11,28 @@
     
     <body>
         <h1>Zork Demo!</h1>
+        
+        <div class="container">
+            
+            <div id="canvas"></div>
 
-        <div id="canvas"></div>
+            <div id="message-area">
 
-        <div id="message-area">
+                <p id="msg">Welcome to Zork Advanced! Enter "help" for help.</p>
 
-            <p id="msg">Welcome to Zork Advanced! Enter "help" for assistance.</p>
+            </div>
 
+            <form id="gui" action="" method="GET" onsubmit="return false;">
+
+                <input id="command" type="text" name="command" placeholder="Type command here">
+
+            </form>
+        
         </div>
-
-        <form id="gui" action="" method="GET" onsubmit="return false;">
-            
-            <input id="command" type="text" name="command" placeholder="Type command here">
-            
-            
-            
-        </form>
         
         <!-- scripts -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.dom.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.dom.min.js"></script>
         <script src="script.js"></script>
     </body>
 
