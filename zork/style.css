@@ -1,5 +1,5 @@
 body {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: 'Slabo 27px', serif;
     font-size: 1em;
     width: 75%;
     margin: auto; 
@@ -16,6 +16,7 @@ body {
 }
 
 #message-area {
+ 
     width: 300px;
     height: 5em;
     text-align: left;
@@ -28,4 +29,12 @@ body {
     word-wrap: break-word;
     display: inline;
     font-weight: bold;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.keywords {
+    color: gold;
+    font-family: 'Play', sans-serif;
+
 }

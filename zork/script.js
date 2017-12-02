@@ -44,18 +44,27 @@ function keyPressed() {
 
 function updateTextArea(str) {
     msg.html(msg.html() + "<br>" + str);
-    msgArea.scrollTop = msgArea.scrollHeight;
+    // This just makes it auto-scroll when new text is entered.
+    document.getElementById("message-area").scrollTop = document.getElementById("message-area").scrollHeight;
 }
 
 function parseCommand() {
-    var c = command.value().trim().split(" ");
+    var rawText = command.value().trim();
+    updateTextArea("<i>\>" + rawText + "</i>");
+    var c = command.value().toLowerCase().trim().split(" ");
     command.value("");
     if(c.length == 1){
         if(c[0] === "help") {
-            updateTextArea("Valid commands are look, take, and help.");
+            updateTextArea("Valid commands are <span class=\"keywords\">look</span>, <span class=\"keywords\">take</span>, <span class=\"keywords\">go</span>, and <span class=\"keywords\">help</span>.");
         }
         else if(c[0] === "look") {
             displayLook();
+        }
+        else if(c[0] === "go") {
+            updateTextArea("Go where?");
+        }
+        else if(c[0] === "take") {
+            updateTextArea("Take what?");
         }
         else {
             updateTextArea("I'm sorry, I don't understand you.");
