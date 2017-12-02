@@ -1,5 +1,5 @@
 // Declare GUI/gameplay stuff
-var canvas, msg, msgArea, command, keywords;
+var canvas, msg, msgArea, command, helpText, errorText;
 
 // Declare items 
 var ball, triforce, soap;
@@ -16,7 +16,8 @@ function setup() {
     msg = select("#msg");
     msgArea = select("#message-area");
     command = select("#command");
-    keywords = ["look", "take", "help"];
+    helpText = "Valid commands are <span class=\"keywords\">look</span>, <span class=\"keywords\">take</span>, <span class=\"keywords\">go</span>, and <span class=\"keywords\">help</span>.";
+    errorText = "I'm sorry, I don't understand you.";
     
     ball = new Item("ball", "A small ball. Round! Bouncy.", true, drawBall);
     triforce = new Item("triforce", "A classic symbol of video games.", false, drawTriforce);
@@ -44,37 +45,51 @@ function keyPressed() {
 
 function updateTextArea(str) {
     msg.html(msg.html() + "<br>" + str);
-    // This just makes it auto-scroll when new text is entered.
+    // This just makes it auto-scroll when new text is entered, naamean?
     document.getElementById("message-area").scrollTop = document.getElementById("message-area").scrollHeight;
 }
 
 function parseCommand() {
     var rawText = command.value().trim();
-    updateTextArea("<i>\>" + rawText + "</i>");
+    updateTextArea("\><span class=\"keywords\">" + rawText + "</span>");
     var c = command.value().toLowerCase().trim().split(" ");
+    c = c.filter(function(foo) {
+        return foo.trim() !== "";
+    });
     command.value("");
     if(c.length == 1){
-        if(c[0] === "help") {
-            updateTextArea("Valid commands are <span class=\"keywords\">look</span>, <span class=\"keywords\">take</span>, <span class=\"keywords\">go</span>, and <span class=\"keywords\">help</span>.");
-        }
-        else if(c[0] === "look") {
-            displayLook();
-        }
-        else if(c[0] === "go") {
-            updateTextArea("Go where?");
-        }
-        else if(c[0] === "take") {
-            updateTextArea("Take what?");
-        }
-        else {
-            updateTextArea("I'm sorry, I don't understand you.");
+        switch(c[0]) {
+            case "help":
+                updateTextArea(helpText);
+                break;
+            case "look":
+                displayLook();
+                break;
+            case "go":
+                updateTextArea("Go where?");
+                break;
+            case "take":
+                updateTextArea("Take what?");
+                break;
+            default: 
+                updateTextArea(errorText);
         }
     }
-    else if(c.length == 2 && c[0] === "look"){
-        displayLookItem(c[1]);
+    else if(c.length == 2){
+        switch(c[0]) {
+            case "look":
+                displayLookItem(c[1]);
+                break;
+            case "take":
+                break;
+            case "go":
+                break;
+            default:
+                updateTextArea(errorText);
+        }
     }
     else{
-        updateTextArea("I'm sorry, I don't understand you.");
+        updateTextArea(errorText);
     }
 }
 
@@ -100,7 +115,7 @@ function displayLookItem(item) {
         updateTextArea(currentLocation.items[i].desc);
     }
     else {
-        updateTextArea("I can't find that item.");
+        updateTextArea("I can't find that.");
     }
 }
 
