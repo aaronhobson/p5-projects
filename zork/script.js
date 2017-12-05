@@ -201,13 +201,18 @@ Classes
 */
 
 function goPlace(place) {
-    var placeID = placeExists(place);
-    if(placeID >= 0) {
-        currentLocation = currentLocation.places[placeID];
-        updateTextArea("You enter the " + currentLocation.name + ".");
+    if(place === currentLocation.name) {
+        updateTextArea("You're already here.");
     }
     else {
-        updateTextArea("I can't find that place.")
+        var placeID = placeExists(place);
+        if(placeID >= 0) {
+            currentLocation = currentLocation.places[placeID];
+            updateTextArea("You enter the " + currentLocation.name + ".");
+        }
+        else {
+            updateTextArea("I can't find that place.")
+        }
     }
 }
 
