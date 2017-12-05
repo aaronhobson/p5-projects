@@ -196,6 +196,10 @@ function pack() {
     }
 }
 
+/*
+Classes
+*/
+
 function goPlace(place) {
     var placeID = placeExists(place);
     if(placeID >= 0) {
@@ -243,7 +247,7 @@ function Room(name, desc, items, places, imageDrawer) {
         this.items.push(item);
     };
     this.removeItem = function(item) {
-        if(this.items.includes(item)){
+        if(this.items.indexOf(item) != -1){
             this.items.splice(item, 1);
         }
     };
