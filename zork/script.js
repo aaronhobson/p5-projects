@@ -7,8 +7,8 @@ var ball, triforce, soap;
 // Declare rooms
 var bathRoom, livingRoom;
 
-// Setup other global variables
-var currentLocation;
+// Setup other game-specific global variables
+var currentLocation, inventory;
 
 function setup() {
     canvas = createCanvas(300, 300);
@@ -16,7 +16,7 @@ function setup() {
     msg = select("#msg");
     msgArea = select("#message-area");
     command = select("#command");
-    helpText = "Valid commands are <span class=\"keywords\">look</span>, <span class=\"keywords\">take</span>, <span class=\"keywords\">go</span>, and <span class=\"keywords\">help</span>.";
+    helpText = "Valid commands are <span class=\"keywords\">look</span>, <span class=\"keywords\">take</span>, <span class=\"keywords\">drop</span>, <span class=\"keywords\">pack</span>, <span class=\"keywords\">go</span>, and <span class=\"keywords\">help</span>.";
     errorText = "I'm sorry, I don't understand you.";
     
     ball = new Item("ball", "A small ball. Round! Bouncy.", true, drawBall);
@@ -30,6 +30,7 @@ function setup() {
     bathRoom.places.push(livingRoom);
     
     currentLocation = livingRoom;
+    inventory = [];
     
 }
 
@@ -63,13 +64,19 @@ function parseCommand() {
                 updateTextArea(helpText);
                 break;
             case "look":
-                displayLook();
+                look();
                 break;
             case "go":
                 updateTextArea("Go where?");
                 break;
             case "take":
                 updateTextArea("Take what?");
+                break;
+            case "drop":
+                updateTextArea("Drop what?");
+                break;
+            case "pack":
+                pack();
                 break;
             default: 
                 updateTextArea(errorText);
@@ -78,11 +85,16 @@ function parseCommand() {
     else if(c.length == 2){
         switch(c[0]) {
             case "look":
-                displayLookItem(c[1]);
+                lookItem(c[1]);
                 break;
             case "take":
+                takeItem(c[1]);
+                break;
+            case "drop":
+                dropItem(c[1]);
                 break;
             case "go":
+                goPlace(c[1]);
                 break;
             default:
                 updateTextArea(errorText);
@@ -94,28 +106,104 @@ function parseCommand() {
 }
 
 
-function displayLook() {
+function look() {
     updateTextArea(currentLocation.desc);
     updateTextArea(currentLocation.listItems());
     updateTextArea(currentLocation.listPlaces());
 }
 
-function displayLookItem(item) {
-    var found = false;
-    var i = 0;
-    while(!found && i < currentLocation.items.length){
+// Return the index of an item if it exists in the room.
+// If the item doesn't exist, return -1 instead.
+function itemExists(item) {
+    for(var i = 0; i < currentLocation.items.length; i++) {
         if(currentLocation.items[i].name === item){
-            found = true;
-        }
-        else {
-            i++;
+            return i;
         }
     }
-    if(found) { 
-        updateTextArea(currentLocation.items[i].desc);
+    return -1;
+}
+
+function holdingItem(item) {
+    for(var i = 0 ; i < inventory.length; i++) {
+        if(inventory[i].name === item) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function placeExists(place) {
+    for(var i = 0; i < currentLocation.places.length; i++) {
+        if(currentLocation.places[i].name === place){
+            return i;
+        }
+    }
+    return -1;
+}
+
+function lookItem(item) {
+    var itemID = itemExists(item);
+    if(itemID >= 0) { 
+        updateTextArea(currentLocation.items[itemID].desc);
     }
     else {
         updateTextArea("I can't find that.");
+    }
+}
+
+function takeItem(item) {
+    var itemID = itemExists(item);
+    if(itemID >= 0) {
+        if(currentLocation.items[itemID].holdable) {
+            updateTextArea("You take the " + currentLocation.items[itemID].name + ".");
+            inventory.push(currentLocation.items[itemID]);
+            currentLocation.removeItem(currentLocation.items[itemID]);      
+        }
+        else {
+            updateTextArea("You can't take that!");
+        }
+    }
+    else {
+        updateTextArea("I can't find that.");
+    }
+}
+
+function dropItem(item) {
+    var itemID = holdingItem(item);
+    if(itemID >= 0) {
+        updateTextArea("You drop the " + inventory[itemID].name + ".");
+        currentLocation.addItem(inventory[itemID]);
+        inventory.splice(inventory[itemID], 1);
+    }
+    else {
+        updateTextArea("You don't have that.");
+    }
+}
+
+function pack() {
+    var text = "";
+    for(var i = 0; i < inventory.length; i++) {
+        text += inventory[i].name + " ";
+    }
+    if(text.length == 0) {
+        updateTextArea("You aren't holding anything.");
+    }
+    else {
+        updateTextArea("Items in your pack: ");
+        for(var i = 0; i < inventory.length; i++) {
+            updateTextArea(inventory[i].name + ": " + inventory[i].desc);
+        }    
+    }
+}
+
+function goPlace(place) {
+    var placeID = placeExists(place);
+    if(placeID >= 0) {
+        currentLocation = currentLocation.places[placeID];
+        updateTextArea("You enter the " + currentLocation.name + ".");
+    }
+    else {
+        updateTextArea("I can't find that place.")
     }
 }
 
@@ -126,21 +214,36 @@ function Room(name, desc, items, places, imageDrawer) {
     this.places = places;
     this.imageDrawer = imageDrawer;
     this.listItems = function() {
-        var text = "Items: ";
+        var text = "";
         for(var i = 0; i < this.items.length; i++) {
             text += this.items[i].name + " ";
+        }
+        if(text.length == 0) {
+            text = "There are no items here.";
+        }
+        else {
+            text = "Items: " + text;
         }
         return text;
     };
     this.listPlaces = function() {
-        var text = "Places: ";
+        var text = "";
         for(var i = 0; i < this.places.length; i++) {
             text += this.places[i].name + " ";
         }
+        if(text.length == 0) {
+            text = "There are no nearby places.";
+        }
+        else {
+            text = "Places: " + text;
+        }
         return text;
     };
+    this.addItem = function(item) {
+        this.items.push(item);
+    };
     this.removeItem = function(item) {
-        if(this.items.indexOf(item) != -1){
+        if(this.items.includes(item)){
             this.items.splice(item, 1);
         }
     };
